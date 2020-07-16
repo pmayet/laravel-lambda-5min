@@ -1,16 +1,35 @@
-service: laravel-lambda-5min
+service: laravel-lambda-5min-dynamodb
 
 provider:
     name: aws
     region: eu-west-1
     runtime: provided
+    tracing:
+      apiGateway: true
+      lambda: true
     httpApi:
         payload: '2.0'
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource:
+          Fn::GetAtt:
+            - sessionsTable
+            - Arn
     environment:
         APP_KEY: ${ssm:/lambda/app_key}
         VIEW_COMPILED_PATH: /tmp/storage/framework/views
-        SESSION_DRIVER: array
         LOG_CHANNEL: stderr
+        SESSION_DRIVER: dynamodb
+        CACHE_DRIVER: dynamodb
+        CACHE_STORE: dynamodb
+        DYNAMODB_CACHE_TABLE: sessionsTable
 
 plugins:
     - ./vendor/bref/bref
@@ -34,3 +53,22 @@ package:
         - resources/assets/**
         - storage/**
         - tests/**
+
+resources:
+  Resources:
+    sessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: sessionsTable
+        AttributeDefinitions:
+          - AttributeName: key #Primary key name used by the Laravel framework
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: expires_at #Key used for the expiration date
+          Enabled: true
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1 #Adapt provisioning capacity according to your needs
+          WriteCapacityUnits: 1

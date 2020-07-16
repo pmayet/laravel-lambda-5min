@@ -94,6 +94,10 @@
                     <a href="https://vapor.laravel.com">Vapor</a>
                     <a href="https://github.com/laravel/laravel">GitHub</a>
                 </div>
+
+                <div style="padding-top: 10px">
+                        DateTime {{ now() }} -  Session ID #{{ session()->getId() }}
+                </div>
             </div>
         </div>
     </body>
