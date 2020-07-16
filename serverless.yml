@@ -1,0 +1,36 @@
+service: laravel-lambda-5min
+
+provider:
+    name: aws
+    region: eu-west-1
+    runtime: provided
+    httpApi:
+        payload: '2.0'
+    environment:
+        APP_KEY: ${ssm:/lambda/app_key}
+        VIEW_COMPILED_PATH: /tmp/storage/framework/views
+        SESSION_DRIVER: array
+        LOG_CHANNEL: stderr
+
+plugins:
+    - ./vendor/bref/bref
+
+functions:
+    web:
+        handler: public/index.php
+        description: ''
+        timeout: 28 # in seconds (API Gateway has a timeout of 29 seconds)
+        layers:
+            - ${bref:layer.php-74-fpm}
+        events:
+            - httpApi: '*'
+
+# Exclude files from deployment
+package:
+    exclude:
+        - .env
+        - node_modules/**
+        - public/storage
+        - resources/assets/**
+        - storage/**
+        - tests/**
