@@ -30,6 +30,7 @@ provider:
         CACHE_DRIVER: dynamodb
         CACHE_STORE: dynamodb
         DYNAMODB_CACHE_TABLE: sessionsTable
+        SESSION_LIFETIME: 15
 
 plugins:
     - ./vendor/bref/bref
