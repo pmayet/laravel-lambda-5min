@@ -43,16 +43,36 @@ functions:
             - ${bref:layer.php-74-fpm}
         events:
             - httpApi: '*'
+    sessionCount:
+        handler: handlerStreamDynamoDb.php
+        description: ''
+        timeout: 28 # in seconds (API Gateway has a timeout of 29 seconds)
+        layers:
+          - ${bref:layer.php-74}
+        events:
+          - stream:
+              type: dynamodb
+              arn: !GetAtt [sessionsTable, StreamArn]
+              batchSize: 1
 
-# Exclude files from deployment
+
 package:
-    exclude:
-        - .env
-        - node_modules/**
-        - public/storage
-        - resources/assets/**
-        - storage/**
-        - tests/**
+  excludeDevDependencies: false
+  exclude:
+    - ./**
+  include:
+    - app/**
+    - bootstrap/**
+    - config/**
+    - database/**
+    - public/index.php
+    - public/mix-manifest.json
+    - resources/lang/**
+    - resources/views/**
+    - routes/**
+    - vendor/**
+    - artisan
+    - handlerStreamDynamoDb.php
 
 resources:
   Resources:
@@ -72,3 +92,6 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1 #Adapt provisioning capacity according to your needs
           WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: KEYS_ONLY
+

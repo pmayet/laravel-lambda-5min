@@ -96,7 +96,7 @@
                 </div>
 
                 <div style="padding-top: 10px">
-                        DateTime {{ now() }} -  Session ID #{{ session()->getId() }}
+                        DateTime {{ now() }} -  Session ID #{{ session()->getId() }} - Connected Session {{ cache()->get('connected', 1) }}
                 </div>
             </div>
         </div>
